@@ -30,14 +30,25 @@ namespace Proiect.Pages.Appointments
                 return NotFound();
             }
 
-            var appointment =  await _context.Appointment.FirstOrDefaultAsync(m => m.ID == id);
-            if (appointment == null)
+            Appointment = await _context.Appointment
+                .Include(b => b.Tatuaj)
+                .Include(b => b.Client)
+                .FirstOrDefaultAsync(m => m.ID == id);
+
+            if (Appointment == null)
             {
                 return NotFound();
             }
-            Appointment = appointment;
-           ViewData["ClientID"] = new SelectList(_context.Client, "ID", "ID");
-           ViewData["TatuajID"] = new SelectList(_context.Tatuaj, "ID", "ID");
+
+            var tattooList = _context.Tatuaj
+                        .Include(b => b.Artist)
+                        .Select(x => new
+                        {
+                            x.ID,
+                            TattooDetails = x.Name + " - " + (x.Artist != null ? x.Artist.Name : "Artist necunoscut")
+                        });
+           ViewData["TatuajID"] = new SelectList(tattooList, "ID", "TattooDetails");
+            ViewData["ClientID"] = new SelectList(_context.Client, "ID", "FullName");
             return Page();
         }
 

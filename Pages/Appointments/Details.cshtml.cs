@@ -28,15 +28,17 @@ namespace Proiect.Pages.Appointments
                 return NotFound();
             }
 
-            var appointment = await _context.Appointment.FirstOrDefaultAsync(m => m.ID == id);
-            if (appointment == null)
+            Appointment = await _context.Appointment
+                        .Include(b => b.Tatuaj)
+                            .ThenInclude(b => b.Artist)
+                        .Include(b => b.Client)
+                        .FirstOrDefaultAsync(m => m.ID == id);
+
+            if (Appointment == null)
             {
                 return NotFound();
             }
-            else
-            {
-                Appointment = appointment;
-            }
+
             return Page();
         }
     }
